@@ -1,21 +1,19 @@
 # AbsintheMemleakReproduction
 
-**TODO: Add description**
+In Absinthe, parsing deeply nested inputs results in an enormous usage of memory.
 
-## Installation
+## Reproduction
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `absinthe_memleak_reproduction` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:absinthe_memleak_reproduction, "~> 0.1.0"}
-  ]
-end
+```
+mix test
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/absinthe_memleak_reproduction](https://hexdocs.pm/absinthe_memleak_reproduction).
+This will run the tests. These tests simply try to run a mutation that doesn't exist, using an input
+type that doesn't exist, along with some deeply nested variables. **On my machine, running this test
+yields over 4GB of memory usage.**
 
+This was extracted from a production system where we had to rework our mutation to no longer match
+the natural structure, because it was simply unusable. The shape of this test's input mirrors the
+shape we're using in production, though I've obfuscated the field names completely.
+
+The issue appears to occur during `Absinthe.Blueprint.Transform.walk`.
